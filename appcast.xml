@@ -7,6 +7,27 @@
         <language>en</language>
 
         <item>
+            <title>Version 3.2</title>
+            <sparkle:version>3.2</sparkle:version>
+            <sparkle:shortVersionString>3.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <pubDate>Mon, 15 Jun 2026 01:05:53 -0500</pubDate>
+            <description><![CDATA[
+                <h3>What's new in V3.2</h3>
+                <ul>
+                    <li>Fixed Desktop permission popup that kept reappearing</li>
+                    <li>Desktop screenshot auto-capture is now opt-in (Settings → Content → Desktop screenshots)</li>
+                    <li>No more surprise screenshots appearing in Temporary</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://github.com/Someshwar1108/ClipSave/releases/download/v3.2/ClipSave-3.2.zip"
+                sparkle:edSignature="1Xjo+F5eiG8h+QCN7b5fwPPTfnfbsnkReN1Itd/qhEUff9WzAi5qhtssvrsNWctu+SAe8V2hpT+ZmwtlW5gHAA=="
+                length="2980157"
+                type="application/octet-stream" />
+        </item>
+
+        <item>
             <title>Version 3.1</title>
             <sparkle:version>3.1</sparkle:version>
             <sparkle:shortVersionString>3.1</sparkle:shortVersionString>
