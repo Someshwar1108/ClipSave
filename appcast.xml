@@ -7,6 +7,25 @@
         <language>en</language>
 
         <item>
+            <title>Version 3.1</title>
+            <sparkle:version>3.1</sparkle:version>
+            <sparkle:shortVersionString>3.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <pubDate>Mon, 15 Jun 2026 00:37:47 -0500</pubDate>
+            <description><![CDATA[
+                <h3>What's new in V3.1</h3>
+                <ul>
+                    <li>Update dialog now appears in front (was opening behind other windows)</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://github.com/Someshwar1108/ClipSave/releases/download/v3.1/ClipSave-3.1.zip"
+                sparkle:edSignature="yFLYb7a59Z6J2cfsBdiLR9gNkk6/ZTTo1P+C7m3E4W+Blh/y6XT93jrQgLCVQVzCREES3v8FqZowDg7T2NsEBQ=="
+                length="2978727"
+                type="application/octet-stream" />
+        </item>
+
+        <item>
             <title>Version 3.0</title>
             <sparkle:version>3.0</sparkle:version>
             <sparkle:shortVersionString>3.0</sparkle:shortVersionString>
