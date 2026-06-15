@@ -7,6 +7,26 @@
         <language>en</language>
 
         <item>
+            <title>Version 3.3</title>
+            <sparkle:version>3.3</sparkle:version>
+            <sparkle:shortVersionString>3.3</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <pubDate>Mon, 15 Jun 2026 02:16:01 -0500</pubDate>
+            <description><![CDATA[
+                <h3>What's new in V3.3</h3>
+                <ul>
+                    <li>Fixed silent "Check for Updates" — Sparkle's dialog now reliably appears</li>
+                    <li>Rewrote Dock-icon lifecycle: no more race between menu dismissal and modal display</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://github.com/Someshwar1108/ClipSave/releases/download/v3.3/ClipSave-3.3.zip"
+                sparkle:edSignature="N4B6OF4hW26ZlRcP/r53OozAy8FX4OlszTbNWqa/X4JY+d+YFRquD1eaLlSNuO+oJvmalvg/DwSYbPyMJrLbAg=="
+                length="2982040"
+                type="application/octet-stream" />
+        </item>
+
+        <item>
             <title>Version 3.2</title>
             <sparkle:version>3.2</sparkle:version>
             <sparkle:shortVersionString>3.2</sparkle:shortVersionString>
