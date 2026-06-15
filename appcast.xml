@@ -7,6 +7,27 @@
         <language>en</language>
 
         <item>
+            <title>Version 3.0</title>
+            <sparkle:version>3.0</sparkle:version>
+            <sparkle:shortVersionString>3.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <pubDate>Mon, 15 Jun 2026 00:29:21 -0500</pubDate>
+            <description><![CDATA[
+                <h3>What's new in V3.0</h3>
+                <ul>
+                    <li>"Check for Updates" now has a real Install button (Sparkle's install flow) — no more "Visit GitHub" alert</li>
+                    <li>Added "Check for Updates" button in Settings → Advanced</li>
+                    <li>Menu-bar-only, gentle update reminders, Settings auto-hides Dock icon (carried over from 2.9)</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://github.com/Someshwar1108/ClipSave/releases/download/v3.0/ClipSave-3.0.zip"
+                sparkle:edSignature="3NLJremPqvjqzrZ5P2GY3ZocZwBpGwKq+kPUSnVqZcL+kjhQU9IsESsaGzcDeD827mz943PtKV/7KSvN+65cDA=="
+                length="2978484"
+                type="application/octet-stream" />
+        </item>
+
+        <item>
             <title>Version 2.9</title>
             <sparkle:version>2.9</sparkle:version>
             <sparkle:shortVersionString>2.9</sparkle:shortVersionString>
