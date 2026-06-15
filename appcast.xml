@@ -7,6 +7,25 @@
         <language>en</language>
 
         <item>
+            <title>Version 3.4</title>
+            <sparkle:version>3.4</sparkle:version>
+            <sparkle:shortVersionString>3.4</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <pubDate>Mon, 15 Jun 2026 02:25:51 -0500</pubDate>
+            <description><![CDATA[
+                <h3>What's new in V3.4</h3>
+                <ul>
+                    <li>Fixed update-loop: Sparkle no longer offers the same version again after install</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://github.com/Someshwar1108/ClipSave/releases/download/v3.4/ClipSave-3.4.zip"
+                sparkle:edSignature="4dfr1N2aeYxpI3nI4PGgYD5VozK37uiWZ/LvKpiNflb0rX4iLjiXA0wckFNHL8Spvl08JseOUwMU9eqxjWKyCg=="
+                length="2982050"
+                type="application/octet-stream" />
+        </item>
+
+        <item>
             <title>Version 3.3</title>
             <sparkle:version>3.3</sparkle:version>
             <sparkle:shortVersionString>3.3</sparkle:shortVersionString>
