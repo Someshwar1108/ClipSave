@@ -6,31 +6,25 @@
         <description>Latest ClipSave releases for macOS</description>
         <language>en</language>
 
-        <!--
-        FUTURE RELEASES go here as <item> entries.
-
-        Example for the next release:
-
         <item>
-            <title>Version 2.8</title>
-            <sparkle:version>2.8</sparkle:version>
-            <sparkle:shortVersionString>2.8</sparkle:shortVersionString>
+            <title>Version 2.9</title>
+            <sparkle:version>2.9</sparkle:version>
+            <sparkle:shortVersionString>2.9</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <pubDate>Sun, 14 Jun 2026 18:00:00 +0000</pubDate>
+            <pubDate>Mon, 15 Jun 2026 00:01:45 -0500</pubDate>
             <description><![CDATA[
-                <h3>What's new in V2.8</h3>
+                <h3>What's new in V2.9</h3>
                 <ul>
-                    <li>Some new feature</li>
-                    <li>Bug fix</li>
+                    <li>ClipSave is now menu-bar-only — no more Dock icon</li>
+                    <li>Settings briefly shows a Dock icon while open, hides on close</li>
+                    <li>Gentle update reminders — small red dot on the menu bar icon instead of surprise popups</li>
                 </ul>
             ]]></description>
             <enclosure
-                url="https://github.com/Someshwar1108/ClipSave/releases/download/v2.8/ClipSave.zip"
-                sparkle:edSignature="SIGNATURE_FROM_SIGN_UPDATE_TOOL"
-                length="FILE_SIZE_IN_BYTES"
+                url="https://github.com/Someshwar1108/ClipSave/releases/download/v2.9/ClipSave-2.9.zip"
+                sparkle:edSignature="GyMO7z+LPN8GRz/ijPtE3Wcm7IUFpgrzDt1R3WwKtX1nklRBZwVedKwzScHbsj1S4/985+xxvSLOXVVGsNixDw=="
+                length="2983447"
                 type="application/octet-stream" />
         </item>
-        -->
-
     </channel>
 </rss>
