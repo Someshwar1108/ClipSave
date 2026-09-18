@@ -7,6 +7,41 @@
         <language>en</language>
 
         <item>
+            <title>Version 3.6</title>
+            <sparkle:version>3.6</sparkle:version>
+            <sparkle:shortVersionString>3.6</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <pubDate>Fri, 18 Sep 2026 13:09:12 -0500</pubDate>
+            <description><![CDATA[
+                <h3>What's new in V3.6</h3>
+                <ul>
+                    <li><b>Filter chips</b> — narrow the list to Text, Images, Links or Files, with live counts</li>
+                    <li><b>Colour detection</b> — hex, rgb and hsl values show a swatch and a colour name, and can be copied in any notation</li>
+                    <li><b>Transform &amp; copy</b> — trim whitespace, change case or format JSON without altering the saved clip</li>
+                    <li><b>Quick Look</b> — press Space on an image, or hover a row for a larger preview</li>
+                    <li><b>Custom shortcuts</b> — reassign the global hotkey and every in-panel key, plus three new optional hotkeys: paste last clip, open to Permanent, and pause/resume</li>
+                    <li><b>Keep history after quitting</b> — optional, off by default</li>
+                    <li><b>Launch at login</b></li>
+                </ul>
+                <h3>Fixes</h3>
+                <ul>
+                    <li>No more repeated Desktop permission prompts — the screenshot watcher now listens for changes instead of re-reading the folder every second</li>
+                    <li>Large screenshots are no longer missed; ClipSave waits for the file to finish writing</li>
+                    <li>Screenshots are picked up from your chosen screenshot folder as well as the Desktop, and a deleted screenshot folder is re-created</li>
+                    <li>Much smoother scrolling — thumbnails are decoded once and cached instead of on every frame</li>
+                    <li>Re-copying something moves it to the top instead of creating a duplicate</li>
+                    <li>Two different screenshots of the same size are no longer mistaken for duplicates</li>
+                    <li>Backspacing in the search field no longer deletes the selected clip</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://github.com/Someshwar1108/ClipSave/releases/download/v3.6/ClipSave-3.6.zip"
+                sparkle:edSignature="/ctjd6iSgtbzRPs+ICVTu/+Ht1TNmDD4cNN8cvRycJyfPS/be7FDK3EE63KUYSnXIqRXETgryNSiYdWWAvwvCQ=="
+                length="3275449"
+                type="application/octet-stream" />
+        </item>
+
+        <item>
             <title>Version 3.4</title>
             <sparkle:version>3.4</sparkle:version>
             <sparkle:shortVersionString>3.4</sparkle:shortVersionString>
