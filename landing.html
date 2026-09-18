@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClipSave — Your Mac's Clipboard, Reimagined</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0a0a0f;
+    color: #fff;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* Animated gradient background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(64, 156, 255, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(101, 207, 197, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(108, 92, 231, 0.1) 0%, transparent 50%);
+    animation: rotate 30s linear infinite;
+    z-index: -1;
+  }
+  @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* Nav */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 20px 40px;
+    backdrop-filter: blur(20px);
+    background: rgba(10, 10, 15, 0.6);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 12px;
+    font-weight: 700; font-size: 18px;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #4dabf7 0%, #339af0 50%, #66d9e8 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .nav-links { display: flex; gap: 30px; }
+  .nav-links a {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none; font-size: 14px; font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: #fff; }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+    position: relative;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px;
+    background: rgba(64, 156, 255, 0.1);
+    border: 1px solid rgba(64, 156, 255, 0.3);
+    border-radius: 100px;
+    font-size: 13px; font-weight: 500;
+    color: #4dabf7;
+    margin-bottom: 32px;
+    animation: fadeInUp 0.8s ease-out;
+  }
+  .hero-badge::before {
+    content: ''; width: 6px; height: 6px;
+    background: #4dabf7; border-radius: 50%;
+    box-shadow: 0 0 10px #4dabf7;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.5); }
+  }
+  h1 {
+    font-size: clamp(48px, 8vw, 96px);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    margin-bottom: 24px;
+    background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,0.7) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: fadeInUp 0.8s ease-out 0.1s both;
+  }
+  .gradient-text {
+    background: linear-gradient(135deg, #4dabf7 0%, #66d9e8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .tagline {
+    font-size: clamp(18px, 2vw, 22px);
+    color: rgba(255,255,255,0.7);
+    max-width: 600px;
+    margin: 0 auto 40px;
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .cta-group {
+    display: flex; gap: 16px;
+    animation: fadeInUp 0.8s ease-out 0.3s both;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .btn {
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-size: 15px; font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #4dabf7, #339af0);
+    color: #fff;
+    box-shadow: 0 8px 30px rgba(64, 156, 255, 0.4);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(64, 156, 255, 0.6);
+  }
+  .btn-secondary {
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .btn-secondary:hover {
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-2px);
+  }
+
+  /* Hero icon */
+  .hero-icon {
+    width: 180px; height: 180px;
+    margin: 60px auto 0;
+    border-radius: 36px;
+    background: linear-gradient(135deg, #4dabf7 0%, #339af0 50%, #66d9e8 100%);
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 30px 80px rgba(64, 156, 255, 0.5);
+    animation: float 6s ease-in-out infinite, fadeInUp 0.8s ease-out 0.4s both;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+  .hero-icon::before {
+    content: '';
+    position: absolute;
+    inset: 24px;
+    background: rgba(255,255,255,0.95);
+    border-radius: 18px;
+    box-shadow: inset 0 -10px 20px rgba(0,0,0,0.05);
+  }
+  .hero-icon::after {
+    content: '';
+    position: absolute;
+    width: 50px; height: 18px;
+    background: rgba(255,255,255,0.95);
+    border-radius: 8px;
+    top: 16px;
+    z-index: 2;
+  }
+  .pin {
+    position: absolute;
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, #339af0, #1c7ed6);
+    border-radius: 50% 50% 50% 4px;
+    transform: rotate(45deg);
+    bottom: 35px; right: 30px;
+    z-index: 3;
+    box-shadow: 0 8px 20px rgba(28, 126, 214, 0.5);
+  }
+  .pin::after {
+    content: '';
+    position: absolute;
+    width: 20px; height: 20px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 50%;
+    top: 8px; left: 8px;
+  }
+
+  /* Sections */
+  section {
+    padding: 100px 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .section-label {
+    color: #4dabf7;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .section-title {
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    text-align: center;
+    margin-bottom: 24px;
+    line-height: 1.1;
+  }
+  .section-subtitle {
+    font-size: 18px;
+    color: rgba(255,255,255,0.6);
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 80px;
+  }
+
+  /* Features grid */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+  .feature-card {
+    padding: 32px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px;
+    backdrop-filter: blur(20px);
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  }
+  .feature-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(64, 156, 255, 0.3);
+    background: rgba(64, 156, 255, 0.05);
+  }
+  .feature-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, rgba(64,156,255,0.2), rgba(102,217,232,0.2));
+    border: 1px solid rgba(64,156,255,0.3);
+  }
+  .feature-card h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .feature-card p {
+    color: rgba(255,255,255,0.6);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* Shortcuts */
+  .shortcuts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .shortcut-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    transition: all 0.2s;
+  }
+  .shortcut-row:hover {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(64,156,255,0.3);
+  }
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    font-family: 'SF Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.2);
+    min-width: 80px;
+    justify-content: center;
+  }
+  .shortcut-desc {
+    color: rgba(255,255,255,0.7);
+    font-size: 14px;
+    flex: 1;
+  }
+
+  /* How it works */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 32px;
+    counter-reset: step;
+  }
+  .step {
+    counter-increment: step;
+    position: relative;
+    padding: 40px 32px 32px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px;
+  }
+  .step::before {
+    content: counter(step);
+    position: absolute;
+    top: -20px; left: 32px;
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, #4dabf7, #339af0);
+    color: #fff;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    font-size: 20px;
+    box-shadow: 0 8px 20px rgba(64, 156, 255, 0.4);
+  }
+  .step h3 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    margin-top: 8px;
+  }
+  .step p {
+    color: rgba(255,255,255,0.6);
+    font-size: 15px;
+  }
+
+  /* CTA section */
+  .cta-section {
+    text-align: center;
+    padding: 120px 24px;
+    background: radial-gradient(circle at center, rgba(64,156,255,0.1), transparent 70%);
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  .cta-section h2 {
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 900;
+    margin-bottom: 24px;
+    letter-spacing: -0.03em;
+  }
+  .cta-section p {
+    font-size: 18px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 40px;
+    max-width: 500px;
+    margin-left: auto; margin-right: auto;
+  }
+
+  /* Footer */
+  footer {
+    padding: 60px 24px 40px;
+    text-align: center;
+    color: rgba(255,255,255,0.4);
+    font-size: 14px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  footer a {
+    color: #4dabf7;
+    text-decoration: none;
+  }
+
+  /* Mobile */
+  @media (max-width: 640px) {
+    nav { padding: 16px 20px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 20px 60px; }
+    .hero-icon { width: 140px; height: 140px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <div class="logo-icon">📋</div>
+    <span>ClipSave</span>
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#shortcuts">Shortcuts</a>
+    <a href="#download">Download</a>
+    <a href="https://github.com/Someshwar1108/ClipSave" target="_blank">GitHub</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-badge">Now available for macOS</div>
+  <h1>Your Mac's clipboard,<br><span class="gradient-text">reimagined.</span></h1>
+  <p class="tagline">A beautiful, lightning-fast clipboard manager that never forgets a copy.<br>Text, images, screenshots, files — all one keystroke away.</p>
+  <div class="cta-group">
+    <a href="https://github.com/Someshwar1108/ClipSave/releases" class="btn btn-primary">
+      Download for Mac →
+    </a>
+    <a href="#features" class="btn btn-secondary">See how it works</a>
+  </div>
+  <div class="hero-icon">
+    <div class="pin"></div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="section-label">Features</div>
+  <h2 class="section-title">Everything you copy,<br>always within reach</h2>
+  <p class="section-subtitle">Built natively for macOS with the polish you'd expect from a top-tier indie Mac app.</p>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">📋</div>
+      <h3>Multi-type capture</h3>
+      <p>Text, rich text, images, screenshots, and files — ClipSave catches everything you copy with full fidelity.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <h3>Global hotkey</h3>
+      <p>Press ⌘⇧V from anywhere on your Mac. The panel appears instantly under your cursor.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⌨️</div>
+      <h3>Keyboard-first</h3>
+      <p>Arrow keys to navigate. ⌘1-9 to grab clip N instantly. Press once, paste anywhere.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📌</div>
+      <h3>Pin forever</h3>
+      <p>Important snippets? Pin them to the permanent tab. Your saved clips persist across launches.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📸</div>
+      <h3>Screenshot ready</h3>
+      <p>Auto-captures screenshots saved to Desktop. Real thumbnails. Hover to preview at full size.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎨</div>
+      <h3>Light + dark</h3>
+      <p>Beautifully adapts to your system theme. Looks native in both modes.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <h3>100% local</h3>
+      <p>Nothing leaves your Mac. No cloud, no sync, no telemetry. Your clipboard is yours.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🚀</div>
+      <h3>Auto-paste</h3>
+      <p>Pick a clip → it pastes directly into your previous app. Optional, off by default.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔄</div>
+      <h3>Auto-updates</h3>
+      <p>New versions install silently in the background. Always on the latest, never lifting a finger.</p>
+    </div>
+  </div>
+</section>
+
+<section id="shortcuts">
+  <div class="section-label">Power user</div>
+  <h2 class="section-title">Keyboard shortcuts<br>built for speed</h2>
+  <p class="section-subtitle">Every action one keystroke away. No mouse needed.</p>
+
+  <div class="shortcuts-grid">
+    <div class="shortcut-row">
+      <span class="kbd">⌘⇧V</span>
+      <span class="shortcut-desc">Open ClipSave from any app</span>
+    </div>
+    <div class="shortcut-row">
+      <span class="kbd">⌘1–9</span>
+      <span class="shortcut-desc">Instantly copy clip 1 through 9</span>
+    </div>
+    <div class="shortcut-row">
+      <span class="kbd">↑ ↓</span>
+      <span class="shortcut-desc">Navigate clips with arrow keys</span>
+    </div>
+    <div class="shortcut-row">
+      <span class="kbd">↩ Enter</span>
+      <span class="shortcut-desc">Copy selected clip and close</span>
+    </div>
+    <div class="shortcut-row">
+      <span class="kbd">⌫ Delete</span>
+      <span class="shortcut-desc">Remove the selected clip</span>
+    </div>
+    <div class="shortcut-row">
+      <span class="kbd">⌘F</span>
+      <span class="shortcut-desc">Focus the search bar</span>
+    </div>
+    <div class="shortcut-row">
+      <span class="kbd">⌘,</span>
+      <span class="shortcut-desc">Open Settings</span>
+    </div>
+    <div class="shortcut-row">
+      <span class="kbd">Esc</span>
+      <span class="shortcut-desc">Close ClipSave</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-label">How it works</div>
+  <h2 class="section-title">Three steps.<br>That's it.</h2>
+  <p class="section-subtitle">Install, copy, paste. ClipSave handles the rest.</p>
+
+  <div class="steps">
+    <div class="step">
+      <h3>Copy as usual</h3>
+      <p>Keep using ⌘C the way you always have. ClipSave runs silently in your menu bar, capturing everything you copy.</p>
+    </div>
+    <div class="step">
+      <h3>Summon anywhere</h3>
+      <p>Press ⌘⇧V from any app. The panel appears next to your cursor with your clip history.</p>
+    </div>
+    <div class="step">
+      <h3>Paste instantly</h3>
+      <p>Click or press ⌘1-9 to grab the clip you want. It's on your clipboard, ready to paste with ⌘V.</p>
+    </div>
+  </div>
+</section>
+
+<section id="download" class="cta-section">
+  <h2>Ready in <span class="gradient-text">10 seconds.</span></h2>
+  <p>Download ClipSave for macOS and never lose a copy again. Free forever.</p>
+  <div class="cta-group" style="justify-content: center;">
+    <a href="https://github.com/Someshwar1108/ClipSave/releases" class="btn btn-primary">
+      Download Latest →
+    </a>
+    <a href="https://github.com/Someshwar1108/ClipSave" class="btn btn-secondary">
+      View on GitHub
+    </a>
+  </div>
+</section>
+
+<footer>
+  <p>Made with ❤️ by <a href="https://github.com/Someshwar1108" target="_blank">Someshwar</a>. Free and open source.</p>
+  <p style="margin-top: 8px;">macOS 14+ • Apple Silicon &amp; Intel • Free forever</p>
+</footer>
+
+<script>
+  // Smooth fade on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.feature-card, .step, .shortcut-row').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
