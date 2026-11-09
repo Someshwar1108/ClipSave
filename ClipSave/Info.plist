@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>SUFeedURL</key>
-	<string>https://raw.githubusercontent.com/Someshwar1108/ClipSave/main/appcast.xml</string>
+	<string>https://clipsave-mu.vercel.app/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>QtPzh1OyRCEQjXjjwfJaYFmNhPyOVon1VY0O4UpYWWg=</string>
 </dict>

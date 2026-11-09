@@ -8,3 +8,5 @@ DerivedData/
 # Per-user Xcode state
 xcuserdata/
 *.xcuserstate
+.vercel
+.env*

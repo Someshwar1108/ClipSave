@@ -19,7 +19,7 @@
 set -euo pipefail
 
 # Public site root, no trailing slash. Baked into the appcast enclosure URL.
-SITE_URL="https://REPLACE_ME"
+SITE_URL="https://clipsave-mu.vercel.app"
 TEAM_ID="6U39FF46MG"
 NOTARY_PROFILE="AC_PASSWORD"
 
