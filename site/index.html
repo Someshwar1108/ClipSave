@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClipSave — Your Mac's Clipboard, Reimagined</title>
+<meta name="description" content="A beautiful, lightning-fast clipboard manager for macOS. Text, images, screenshots, and files — one keystroke away. 100% local, no telemetry, free forever.">
+<link rel="icon" type="image/png" href="favicon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ClipSave — Your Mac's Clipboard, Reimagined">
+<meta property="og:description" content="A beautiful, lightning-fast clipboard manager for macOS. Text, images, screenshots, and files — one keystroke away. 100% local, no telemetry, free forever.">
+<meta property="og:image" content="og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ClipSave — Your Mac's Clipboard, Reimagined">
+<meta name="twitter:description" content="A beautiful, lightning-fast clipboard manager for macOS. Text, images, screenshots, and files — one keystroke away.">
+<meta name="twitter:image" content="og-image.png">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  :root {
+    color-scheme: light dark;
+    --bg: #FAFAF9;
+    --surface: #FFFFFF;
+    --text: #111827;
+    --text-secondary: #5E6875;
+    --border: #E5E7EB;
+    --accent: #14B8A6;
+    --accent-hover: #2DD4BF;
+    --overlay: rgba(0,0,0,0.04);
+    --overlay-strong: rgba(0,0,0,0.07);
+    --nav-bg: rgba(250,250,249,0.75);
+    --shadow: rgba(17,24,39,0.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0B0D10;
+      --surface: #14171C;
+      --text: #F4F7FA;
+      --text-secondary: #A6AFBA;
+      --border: rgba(255,255,255,0.10);
+      --overlay: rgba(255,255,255,0.05);
+      --overlay-strong: rgba(255,255,255,0.09);
+      --nav-bg: rgba(11,13,16,0.75);
+      --shadow: rgba(0,0,0,0.4);
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* Nav */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 18px 40px;
+    backdrop-filter: blur(20px);
+    background: var(--nav-bg);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 600; font-size: 16px;
+  }
+  .logo-icon {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    display: block;
+  }
+  .nav-links { display: flex; gap: 28px; align-items: center; }
+  .nav-links a {
+    color: var(--text-secondary);
+    text-decoration: none; font-size: 14px; font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+
+  /* Hero */
+  .hero {
+    min-height: 92vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 130px 24px 40px;
+    position: relative;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 14px;
+    background: rgba(20,184,166,0.08);
+    border: 1px solid rgba(20,184,166,0.25);
+    border-radius: 100px;
+    font-size: 13px; font-weight: 500;
+    color: var(--accent);
+    margin-bottom: 28px;
+    animation: fadeInUp 0.7s ease-out;
+  }
+  .hero-badge::before {
+    content: ''; width: 6px; height: 6px;
+    background: var(--accent); border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.4); }
+  }
+  h1 {
+    font-size: clamp(42px, 9vw, 76px);
+    font-weight: 800;
+    line-height: 1.06;
+    letter-spacing: -0.03em;
+    margin-bottom: 22px;
+    color: var(--text);
+    animation: fadeInUp 0.7s ease-out 0.08s both;
+  }
+  .accent-text { color: var(--accent); }
+  .tagline {
+    font-size: clamp(18px, 1.6vw, 20px);
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto 28px;
+    animation: fadeInUp 0.7s ease-out 0.16s both;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .privacy-line {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    animation: fadeInUp 0.7s ease-out 0.22s both;
+  }
+  .privacy-line span { color: var(--accent); }
+  .privacy-sub {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 28px;
+    animation: fadeInUp 0.7s ease-out 0.26s both;
+  }
+  .diff-pills {
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+    margin-bottom: 32px;
+    animation: fadeInUp 0.7s ease-out 0.3s both;
+  }
+  .diff-pills span {
+    font-size: 12.5px; font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    background: var(--surface);
+  }
+  .cta-group {
+    display: flex; gap: 14px;
+    animation: fadeInUp 0.7s ease-out 0.34s both;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .btn {
+    padding: 14px 28px;
+    border-radius: 11px;
+    font-size: 15px; font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #06201C;
+    border: 1px solid transparent;
+    box-shadow: 0 4px 16px rgba(20,184,166,0.35);
+  }
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(20,184,166,0.45);
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover {
+    border-color: var(--accent);
+    background: var(--overlay);
+  }
+  .trust-line {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 18px;
+    animation: fadeInUp 0.7s ease-out 0.38s both;
+  }
+  .version-badge {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    opacity: 0.75;
+  }
+
+  /* Product mockup */
+  .mockup-section {
+    position: relative;
+    padding: 56px 24px 110px;
+    display: flex;
+    justify-content: center;
+  }
+  .mockup-section::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 620px; height: 460px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(20,184,166,0.16), transparent 70%);
+    filter: blur(30px);
+    z-index: -1;
+    pointer-events: none;
+  }
+  .app-mock {
+    --mock-accent: #3B82F6;
+    width: 380px;
+    max-width: 100%;
+    border-radius: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: 0 24px 60px var(--shadow), 0 4px 14px rgba(17,24,39,0.05);
+    overflow: hidden;
+    animation: float 7s ease-in-out infinite 0.4s;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  .app-mock-tabs {
+    display: flex;
+    align-items: center;
+    background: var(--overlay);
+    font-size: 13px; font-weight: 600;
+    padding-right: 6px;
+  }
+  .app-mock-tabs span[data-tab] {
+    padding: 12px 0;
+    text-align: center;
+    flex: 1;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s ease;
+  }
+  .app-mock-tabs span[data-tab]:hover:not(.active) { color: var(--text); }
+  .app-mock-tabs span[data-tab].active {
+    color: var(--mock-accent);
+    background: var(--surface);
+    box-shadow: inset 0 -2px 0 var(--mock-accent);
+  }
+  .app-mock-tabs .mock-icon-btn {
+    flex-shrink: 0;
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-secondary);
+    opacity: 0.7;
+    font-size: 13px;
+  }
+  .app-mock-search {
+    margin: 12px 14px 0;
+    padding: 8px 10px;
+    background: var(--overlay);
+    border-radius: 7px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .app-mock-chips {
+    display: flex; gap: 6px;
+    padding: 10px 14px 4px;
+    flex-wrap: wrap;
+  }
+  .app-mock-chips span {
+    font-size: 11px; font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 100px;
+    background: var(--overlay);
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+  }
+  .app-mock-chips span:hover:not(.active) { color: var(--text); }
+  .app-mock-chips span.active {
+    background: var(--mock-accent);
+    color: #fff;
+  }
+  .app-mock-chips span.zero { opacity: 0.4; cursor: default; }
+  .app-mock-add {
+    display: flex; gap: 8px;
+    padding: 10px 14px 2px;
+  }
+  .app-mock-add input {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 10px;
+    background: var(--overlay);
+    border-radius: 7px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .app-mock-add button {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border-radius: 7px;
+    background: var(--mock-accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .app-mock-rows {
+    padding: 10px 10px 16px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .app-mock-rows[hidden] { display: none; }
+  .app-mock-row {
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 10px;
+    border-radius: 9px;
+    background: var(--overlay);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+  .app-mock-row[hidden] { display: none; }
+  .app-mock-row:hover { background: var(--overlay-strong); }
+  .app-mock-row.selected {
+    background: color-mix(in srgb, var(--mock-accent) 12%, transparent);
+    border-color: color-mix(in srgb, var(--mock-accent) 40%, transparent);
+  }
+  .app-mock-row .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--mock-accent);
+    flex-shrink: 0;
+  }
+  .app-mock-row .row-text {
+    font-size: 12.5px;
+    color: var(--text);
+    opacity: 0.85;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    flex: 1;
+  }
+  .app-mock-row .row-meta {
+    font-size: 10.5px;
+    color: var(--text-secondary);
+    display: block;
+  }
+  .app-mock-row .row-thumb {
+    width: 26px; height: 26px;
+    border-radius: 5px;
+    background: linear-gradient(135deg, var(--mock-accent), #5eead4);
+    flex-shrink: 0;
+  }
+  .app-mock-row .swatch {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--mock-accent);
+    border: 2px solid var(--surface);
+    box-shadow: 0 0 0 1px var(--border);
+    flex-shrink: 0;
+  }
+  .app-mock-row .cmd {
+    flex-shrink: 0;
+    margin-left: auto;
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: var(--overlay-strong);
+    color: var(--text-secondary);
+    font-family: 'SF Mono', ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  /* Sections */
+  section {
+    padding: 90px 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .section-label {
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .section-title {
+    font-size: clamp(32px, 4.5vw, 48px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    text-align: center;
+    margin-bottom: 20px;
+    line-height: 1.15;
+  }
+  .section-subtitle {
+    font-size: 18px;
+    color: var(--text-secondary);
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 64px;
+  }
+
+  /* Features grid */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .feature-card {
+    padding: 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .feature-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: 0 8px 24px var(--shadow);
+  }
+  .feature-card.featured {
+    background: rgba(20,184,166,0.045);
+    border-color: rgba(20,184,166,0.3);
+  }
+  .feature-icon {
+    width: 44px; height: 44px;
+    border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 18px;
+    background: rgba(20,184,166,0.12);
+    border: 1px solid rgba(20,184,166,0.25);
+    color: var(--accent);
+  }
+  .feature-icon svg {
+    width: 21px; height: 21px;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .feature-card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+  .feature-card p {
+    color: var(--text-secondary);
+    font-size: 14.5px;
+    line-height: 1.6;
+  }
+
+  /* Shortcuts — dark command-palette panel, regardless of page theme */
+  .shortcuts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .shortcut-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .shortcut-row:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 7px 11px;
+    background: var(--overlay);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-family: 'SF Mono', ui-monospace, monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+    min-width: 76px;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .shortcut-desc {
+    color: var(--text-secondary);
+    font-size: 14px;
+    flex: 1;
+    text-align: left;
+  }
+
+  /* How it works */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 28px;
+    counter-reset: step;
+  }
+  .step {
+    counter-increment: step;
+    position: relative;
+    padding: 36px 28px 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+  }
+  .step::before {
+    content: counter(step);
+    position: absolute;
+    top: -18px; left: 28px;
+    width: 42px; height: 42px;
+    background: var(--accent);
+    color: #06201C;
+    border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    box-shadow: 0 6px 16px rgba(20,184,166,0.35);
+  }
+  .step h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    margin-top: 8px;
+  }
+  .step p {
+    color: var(--text-secondary);
+    font-size: 14.5px;
+  }
+
+  /* CTA section */
+  .cta-section {
+    position: relative;
+    text-align: center;
+    padding: 110px 24px;
+    border-top: 1px solid var(--border);
+  }
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    width: 500px; height: 100%;
+    transform: translateX(-50%);
+    background: radial-gradient(circle at center, rgba(20,184,166,0.07), transparent 70%);
+    z-index: -1;
+    pointer-events: none;
+  }
+  .cta-section h2 {
+    font-size: clamp(32px, 4.5vw, 52px);
+    font-weight: 800;
+    margin-bottom: 16px;
+    letter-spacing: -0.03em;
+  }
+  .cta-section p {
+    font-size: 17px;
+    color: var(--text-secondary);
+    margin-bottom: 36px;
+    max-width: 500px;
+    margin-left: auto; margin-right: auto;
+  }
+
+  /* Footer */
+  footer {
+    padding: 56px 24px 36px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+    border-top: 1px solid var(--border);
+  }
+  footer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  footer a:hover { color: var(--accent-hover); }
+
+  /* Mobile */
+  @media (max-width: 640px) {
+    nav { padding: 14px 18px; }
+    .nav-links a:not(.nav-download) { display: none; }
+    .hero { padding: 110px 18px 40px; }
+    section { padding: 64px 20px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <img class="logo-icon" src="app-icon.png" alt="ClipSave icon">
+    <span>ClipSave</span>
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#shortcuts">Shortcuts</a>
+    <a href="#download" class="nav-download">Download</a>
+    <a href="https://github.com/Someshwar1108/ClipSave" target="_blank">GitHub</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-badge">Now available for macOS</div>
+  <h1>Your Mac's clipboard,<br><span class="accent-text">reimagined.</span></h1>
+  <p class="tagline">A beautiful, lightning-fast clipboard manager that never forgets a copy.<br>Text, images, screenshots, files — all one keystroke away.</p>
+
+  <p class="privacy-line">Native macOS. <span>Private by default.</span></p>
+  <p class="privacy-sub">Built in Swift, with no subscription, cloud dependency, or telemetry.</p>
+
+  <div class="diff-pills">
+    <span>100% Local</span>
+    <span>Native Swift</span>
+    <span>Free Forever</span>
+  </div>
+
+  <div class="cta-group">
+    <a href="/download/ClipSave-3.7.dmg" class="btn btn-primary" download>
+      Download for Mac →
+    </a>
+    <a href="#features" class="btn btn-secondary">See how it works</a>
+  </div>
+  <p class="trust-line">No account · No cloud · No subscription</p>
+  <div class="version-badge">v3.6 · macOS 14+ · Apple Silicon &amp; Intel</div>
+</section>
+
+<section class="mockup-section">
+  <div class="app-mock">
+    <div class="app-mock-tabs">
+      <span class="active" data-tab="temp">⏱ Temporary</span>
+      <span data-tab="perm">📌 Permanent</span>
+      <span class="mock-icon-btn">☰</span>
+      <span class="mock-icon-btn">✕</span>
+    </div>
+    <div class="app-mock-search">🔍 Search clips...</div>
+    <div class="app-mock-chips">
+      <span class="active" data-filter="all">All</span>
+      <span data-filter="text">Text</span>
+      <span data-filter="image">Images</span>
+      <span data-filter="link">Links</span>
+      <span data-filter="file">Files</span>
+    </div>
+    <div class="app-mock-add">
+      <input type="text" placeholder="Add to temp..." readonly>
+      <button type="button">+Temp</button>
+    </div>
+    <div class="app-mock-rows" data-panel="temp">
+      <div class="app-mock-row selected" data-type="text">
+        <span class="dot"></span>
+        <span class="row-text">Fixed the auth middleware bug in login.swift</span>
+        <span class="cmd">⌘1</span>
+      </div>
+      <div class="app-mock-row" data-type="link">
+        <span class="dot"></span>
+        <span class="row-text">https://github.com/Someshwar1108/ClipSave</span>
+        <span class="cmd">⌘2</span>
+      </div>
+      <div class="app-mock-row" data-type="image">
+        <span class="row-thumb"></span>
+        <span class="row-text">Screenshot 2026-09-18.png<span class="row-meta">2940×1912 · 5.8 MB</span></span>
+        <span class="cmd">⌘3</span>
+      </div>
+      <div class="app-mock-row" data-type="file">
+        <span class="dot"></span>
+        <span class="row-text">file:///Users/you/Desktop/release-notes.md</span>
+        <span class="cmd">⌘4</span>
+      </div>
+      <div class="app-mock-row" data-type="link">
+        <span class="dot"></span>
+        <span class="row-text">https://github.com/Someshwar1108/ClipSave/releases</span>
+        <span class="cmd">⌘5</span>
+      </div>
+      <div class="app-mock-row" data-type="text">
+        <span class="swatch"></span>
+        <span class="row-text">#14B8A6 — brand teal</span>
+        <span class="cmd">⌘6</span>
+      </div>
+    </div>
+    <div class="app-mock-rows" data-panel="perm" hidden>
+      <div class="app-mock-row selected" data-type="text">
+        <span class="dot"></span>
+        <span class="row-text">Release checklist template</span>
+        <span class="cmd">⌘1</span>
+      </div>
+      <div class="app-mock-row" data-type="text">
+        <span class="dot"></span>
+        <span class="row-text">Support reply — thanks for reaching out, here's how to…</span>
+        <span class="cmd">⌘2</span>
+      </div>
+      <div class="app-mock-row" data-type="link">
+        <span class="dot"></span>
+        <span class="row-text">https://clipsave.app</span>
+        <span class="cmd">⌘3</span>
+      </div>
+      <div class="app-mock-row" data-type="text">
+        <span class="dot"></span>
+        <span class="row-text">ClipSave — Your Mac's Clipboard, Reimagined</span>
+        <span class="cmd">⌘4</span>
+      </div>
+      <div class="app-mock-row" data-type="file">
+        <span class="dot"></span>
+        <span class="row-text">file:///Applications/ClipSave.app</span>
+        <span class="cmd">⌘5</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="section-label">Features</div>
+  <h2 class="section-title">Everything you copy,<br>always within reach</h2>
+  <p class="section-subtitle">Built natively for macOS with the polish you'd expect from a top-tier indie Mac app.</p>
+
+  <div class="features-grid">
+    <div class="feature-card featured">
+      <div class="feature-icon"><svg viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="9" y1="14" x2="13" y2="14"/></svg></div>
+      <h3>Multi-type capture</h3>
+      <p>Text, rich text, images, screenshots, and files — ClipSave catches everything you copy with full fidelity.</p>
+    </div>
+    <div class="feature-card featured">
+      <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg></div>
+      <h3>Global hotkey</h3>
+      <p>Press ⌘⇧V from anywhere on your Mac. The panel appears instantly under your cursor. Fully customizable in Settings.</p>
+    </div>
+    <div class="feature-card featured">
+      <div class="feature-icon"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+      <h3>100% local</h3>
+      <p>Nothing leaves your Mac. No cloud, no sync, no telemetry. Your clipboard is yours.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="13" rx="2"/><circle cx="6.5" cy="10.2" r="0.9" fill="currentColor" stroke="none"/><circle cx="10.5" cy="10.2" r="0.9" fill="currentColor" stroke="none"/><circle cx="14.5" cy="10.2" r="0.9" fill="currentColor" stroke="none"/><circle cx="18" cy="10.2" r="0.9" fill="currentColor" stroke="none"/><line x1="6.5" y1="15" x2="17.5" y2="15"/></svg></div>
+      <h3>Keyboard-first</h3>
+      <p>Arrow keys to navigate. ⌘1-9 to grab clip N instantly. Press once, paste anywhere.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 21s7-7.58 7-12a7 7 0 1 0-14 0c0 4.42 7 12 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg></div>
+      <h3>Pin forever</h3>
+      <p>Important snippets? Pin them to the permanent tab. Your saved clips persist across launches.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-2h6l2 2h3v11H4Z"/><circle cx="12" cy="13.5" r="3.3"/></svg></div>
+      <h3>Screenshot ready</h3>
+      <p>Auto-captures screenshots saved to Desktop. Real thumbnails. Hover to preview at full size.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg></div>
+      <h3>Light + dark</h3>
+      <p>Beautifully adapts to your system theme. Looks native in both modes.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></div>
+      <h3>Auto-paste</h3>
+      <p>Pick a clip → it pastes directly into your previous app. Optional, off by default.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.3 6.5L3 16"/><path d="M3 12a9 9 0 0 1 15.3-6.5L21 8"/><path d="M3 16v4h4"/><path d="M21 8V4h-4"/></svg></div>
+      <h3>Auto-updates</h3>
+      <p>New versions install silently in the background. Always on the latest, never lifting a finger.</p>
+    </div>
+  </div>
+</section>
+
+<section id="shortcuts">
+  <div class="section-label">Power user</div>
+  <h2 class="section-title">Keyboard shortcuts<br>built for speed</h2>
+  <p class="section-subtitle">Every action one keystroke away. No mouse needed.<br>Every shortcut below — plus a few optional ones — can be reassigned in Settings.</p>
+
+  <div class="shortcuts-grid">
+    <div class="shortcut-row">
+      <span class="kbd">⌘⇧V</span>
+      <span class="shortcut-desc">Open ClipSave from any app</span>
+    </div>
+    <div class="shortcut-row">
+      <span class="kbd">⌘1–9</span>
+      <span class="shortcut-desc">Instantly copy clip 1 through 9</span>
+    </div>
+    <div class="shortcut-row">
+      <span class="kbd">↑ ↓</span>
+      <span class="shortcut-desc">Navigate clips with arrow keys</span>
+    </div>
+    <div class="shortcut-row">
+      <span class="kbd">↩ Enter</span>
+      <span class="shortcut-desc">Copy selected clip and close</span>
+    </div>
+    <div class="shortcut-row">
+      <span class="kbd">⌫ Delete</span>
+      <span class="shortcut-desc">Remove the selected clip</span>
+    </div>
+    <div class="shortcut-row">
+      <span class="kbd">⌘F</span>
+      <span class="shortcut-desc">Focus the search bar</span>
+    </div>
+    <div class="shortcut-row">
+      <span class="kbd">⌘,</span>
+      <span class="shortcut-desc">Open Settings</span>
+    </div>
+    <div class="shortcut-row">
+      <span class="kbd">Esc</span>
+      <span class="shortcut-desc">Close ClipSave</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-label">How it works</div>
+  <h2 class="section-title">Three steps.<br>That's it.</h2>
+  <p class="section-subtitle">Install, copy, paste. ClipSave handles the rest.</p>
+
+  <div class="steps">
+    <div class="step">
+      <h3>Copy as usual</h3>
+      <p>Keep using ⌘C the way you always have. ClipSave runs silently in your menu bar, capturing everything you copy.</p>
+    </div>
+    <div class="step">
+      <h3>Summon anywhere</h3>
+      <p>Press ⌘⇧V from any app. The panel appears next to your cursor with your clip history.</p>
+    </div>
+    <div class="step">
+      <h3>Paste instantly</h3>
+      <p>Click or press ⌘1-9 to grab the clip you want. It's on your clipboard, ready to paste with ⌘V.</p>
+    </div>
+  </div>
+</section>
+
+<section id="download" class="cta-section">
+  <h2>Start keeping every copy in <span class="accent-text">10 seconds.</span></h2>
+  <p>Free, local, and built for macOS 14+.</p>
+  <div class="cta-group" style="justify-content: center;">
+    <a href="/download/ClipSave-3.7.dmg" class="btn btn-primary" download>
+      Download Latest →
+    </a>
+    <a href="https://github.com/Someshwar1108/ClipSave" class="btn btn-secondary">
+      View on GitHub
+    </a>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 ClipSave. Free and open source, <a href="https://github.com/Someshwar1108/ClipSave/blob/main/LICENSE" target="_blank">MIT licensed</a>.</p>
+  <p style="margin-top: 8px;">macOS 14+ • Apple Silicon &amp; Intel • Free forever</p>
+</footer>
+
+<script>
+  // Smooth fade on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.feature-card, .step, .shortcut-row').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+    observer.observe(el);
+  });
+
+  // Interactive app mockup — tabs, filters, and row selection
+  (() => {
+    const mock = document.querySelector('.app-mock');
+    if (!mock) return;
+
+    const ACCENT = { temp: '#3B82F6', perm: '#F59E0B' };
+    const ADD_LABEL = {
+      temp: { placeholder: 'Add to temp...', button: '+Temp' },
+      perm: { placeholder: 'Save permanent...', button: 'Save' }
+    };
+
+    const tabs = mock.querySelectorAll('.app-mock-tabs [data-tab]');
+    const chips = mock.querySelectorAll('.app-mock-chips [data-filter]');
+    const panels = mock.querySelectorAll('.app-mock-rows[data-panel]');
+    const addInput = mock.querySelector('.app-mock-add input');
+    const addButton = mock.querySelector('.app-mock-add button');
+
+    function countsFor(panel) {
+      const rows = panel.querySelectorAll('.app-mock-row');
+      const counts = { all: rows.length, text: 0, image: 0, link: 0, file: 0 };
+      rows.forEach(row => counts[row.dataset.type]++);
+      return counts;
+    }
+
+    const CHIP_LABEL = { all: 'All', text: 'Text', image: 'Images', link: 'Links', file: 'Files' };
+
+    function refreshChips(panel) {
+      const counts = countsFor(panel);
+      chips.forEach(chip => {
+        const n = counts[chip.dataset.filter];
+        const label = CHIP_LABEL[chip.dataset.filter];
+        chip.textContent = n > 0 || chip.dataset.filter === 'all' ? `${label} ${n}` : label;
+        chip.classList.toggle('zero', n === 0);
+        chip.classList.toggle('active', chip.dataset.filter === 'all');
+      });
+      applyFilter(panel, 'all');
+    }
+
+    function applyFilter(panel, filter) {
+      panel.querySelectorAll('.app-mock-row').forEach(row => {
+        row.hidden = filter !== 'all' && row.dataset.type !== filter;
+      });
+    }
+
+    function activePanel() {
+      return mock.querySelector('.app-mock-rows[data-panel]:not([hidden])');
+    }
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = tab.dataset.tab;
+        tabs.forEach(t => t.classList.toggle('active', t === tab));
+        panels.forEach(panel => { panel.hidden = panel.dataset.panel !== target; });
+        mock.style.setProperty('--mock-accent', ACCENT[target]);
+        addInput.placeholder = ADD_LABEL[target].placeholder;
+        addButton.textContent = ADD_LABEL[target].button;
+        refreshChips(activePanel());
+      });
+    });
+
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        if (chip.classList.contains('zero')) return;
+        chips.forEach(c => c.classList.toggle('active', c === chip));
+        applyFilter(activePanel(), chip.dataset.filter);
+      });
+    });
+
+    mock.querySelectorAll('.app-mock-row').forEach(row => {
+      row.addEventListener('click', () => {
+        row.closest('.app-mock-rows').querySelectorAll('.app-mock-row').forEach(r => {
+          r.classList.toggle('selected', r === row);
+        });
+      });
+    });
+
+    refreshChips(activePanel());
+  })();
+</script>
+</body>
+</html>
