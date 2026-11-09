@@ -18,7 +18,7 @@ Website: https://clipsave-mu.vercel.app
 - Filter by Text, Images, Links or Files; search across clips
 - Colour detection, text transforms, and image Quick Look
 - Optional automatic capture of screenshots
-- Launch at login
+
 
 ## Build from source
 
