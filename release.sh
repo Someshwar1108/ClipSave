@@ -126,6 +126,8 @@ find "${SITE_DIR}/download" -name 'ClipSave-*.dmg' -delete
 cp "${DMG_PATH}" "${SITE_DIR}/download/"
 sed -i '' -E "s#/download/ClipSave-[0-9.]+\.dmg#/download/ClipSave-${VERSION}.dmg#g" "${SITE_DIR}/index.html" "${PROJECT_DIR}/README.md"
 sed -i '' -E "s#\(v[0-9.]+, notarized DMG#(v${VERSION}, notarized DMG#" "${PROJECT_DIR}/README.md"
+DMG_MB=$(stat -f %z "${DMG_PATH}" | awk '{ printf "%.1f", $1 / 1000000 }')
+sed -i '' -E "s#v[0-9.]+ · [0-9.]+ MB#v${VERSION} · ${DMG_MB} MB#g; s#\"softwareVersion\": \"[0-9.]+\"#\"softwareVersion\": \"${VERSION}\"#" "${SITE_DIR}/index.html"
 
 NOTES_FILE="${PROJECT_DIR}/release-notes/${VERSION}.html"
 if [ -f "${NOTES_FILE}" ]; then

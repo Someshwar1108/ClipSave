@@ -3,17 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ClipSave — Your Mac's Clipboard, Reimagined</title>
-<meta name="description" content="A beautiful, lightning-fast clipboard manager for macOS. Text, images, screenshots, and files — one keystroke away. 100% local, no telemetry, free forever.">
+<title>ClipSave — Clipboard History for Mac</title>
+<meta name="description" content="ClipSave keeps everything you copy on your Mac — text, images, screenshots and files — and brings it back with one shortcut. Free, private, no account.">
 <link rel="icon" type="image/png" href="favicon.png">
+<link rel="canonical" href="https://clipsave-mu.vercel.app/">
+<meta name="theme-color" content="#14B8A6">
 <meta property="og:type" content="website">
-<meta property="og:title" content="ClipSave — Your Mac's Clipboard, Reimagined">
-<meta property="og:description" content="A beautiful, lightning-fast clipboard manager for macOS. Text, images, screenshots, and files — one keystroke away. 100% local, no telemetry, free forever.">
-<meta property="og:image" content="og-image.png">
+<meta property="og:url" content="https://clipsave-mu.vercel.app/">
+<meta property="og:site_name" content="ClipSave">
+<meta property="og:title" content="ClipSave — Clipboard History for Mac">
+<meta property="og:description" content="Everything you copied today, one shortcut away. Free, private, no account.">
+<meta property="og:image" content="https://clipsave-mu.vercel.app/og-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="ClipSave — Your Mac's Clipboard, Reimagined">
-<meta name="twitter:description" content="A beautiful, lightning-fast clipboard manager for macOS. Text, images, screenshots, and files — one keystroke away.">
-<meta name="twitter:image" content="og-image.png">
+<meta name="twitter:title" content="ClipSave — Clipboard History for Mac">
+<meta name="twitter:description" content="Everything you copied today, one shortcut away. Free, private, no account.">
+<meta name="twitter:image" content="https://clipsave-mu.vercel.app/og-card.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "ClipSave",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "macOS 14 or later",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "downloadUrl": "https://clipsave-mu.vercel.app/download/ClipSave-3.7.dmg",
+  "softwareVersion": "3.7"
+}
+</script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -214,6 +232,65 @@
     color: var(--text-secondary);
     opacity: 0.75;
   }
+  .install-hint,
+  .cta-section .install-hint {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 4px auto 0;
+    max-width: none;
+  }
+  .cta-section .cta-group { margin-bottom: 14px; }
+
+  /* FAQ */
+  .faq-list {
+    max-width: 760px;
+    margin: 0 auto;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .faq-list details {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 0 20px;
+    transition: border-color 0.15s ease;
+  }
+  .faq-list details[open] { border-color: var(--accent); }
+  .faq-list summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 16px 0;
+    font-size: 16px; font-weight: 600;
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  }
+  .faq-list summary::-webkit-details-marker { display: none; }
+  .faq-list summary::after {
+    content: '+';
+    flex-shrink: 0;
+    color: var(--accent);
+    font-size: 20px; font-weight: 500;
+    transition: transform 0.2s ease;
+  }
+  .faq-list details[open] summary::after { transform: rotate(45deg); }
+  .faq-list details p {
+    color: var(--text-secondary);
+    font-size: 15px;
+    padding: 0 0 18px;
+  }
+
+  /* What's new (filled from appcast.xml) */
+  #whats-new[hidden] { display: none; }
+  .whats-new-body {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    color: var(--text-secondary);
+    font-size: 15px;
+  }
+  .whats-new-body h3 { display: none; }
+  .whats-new-body ul { padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
 
   /* Product mockup */
   .mockup-section {
@@ -632,6 +709,7 @@
   <div class="nav-links">
     <a href="#features">Features</a>
     <a href="#shortcuts">Shortcuts</a>
+    <a href="#faq">FAQ</a>
     <a href="#download" class="nav-download">Download</a>
     <a href="https://github.com/Someshwar1108/ClipSave" target="_blank">GitHub</a>
   </div>
@@ -639,8 +717,8 @@
 
 <section class="hero">
   <div class="hero-badge">Now available for macOS</div>
-  <h1>Your Mac's clipboard,<br><span class="accent-text">reimagined.</span></h1>
-  <p class="tagline">A beautiful, lightning-fast clipboard manager that never forgets a copy.<br>Text, images, screenshots, files — all one keystroke away.</p>
+  <h1>Everything you copied today,<br><span class="accent-text">one shortcut away.</span></h1>
+  <p class="tagline">ClipSave sits in your menu bar and remembers every copy.<br>Press ⌘⇧V to find it again — text, images, screenshots, files.</p>
 
   <p class="privacy-line">Native macOS. <span>Private by default.</span></p>
   <p class="privacy-sub">Built in Swift, with no subscription, cloud dependency, or telemetry.</p>
@@ -658,7 +736,8 @@
     <a href="#features" class="btn btn-secondary">See how it works</a>
   </div>
   <p class="trust-line">No account · No cloud · No subscription</p>
-  <div class="version-badge">v3.6 · macOS 14+ · Apple Silicon &amp; Intel</div>
+  <div class="version-badge">v3.7 · 3.7 MB · macOS 14+ · Apple Silicon &amp; Intel · Notarized by Apple</div>
+  <p class="install-hint">Open the DMG, then drag ClipSave into Applications.</p>
 </section>
 
 <section class="mockup-section">
@@ -777,12 +856,27 @@
     <div class="feature-card">
       <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-2h6l2 2h3v11H4Z"/><circle cx="12" cy="13.5" r="3.3"/></svg></div>
       <h3>Screenshot ready</h3>
-      <p>Auto-captures screenshots saved to Desktop. Real thumbnails. Hover to preview at full size.</p>
+      <p>New screenshots land in your history on their own, with real thumbnails. Switch it off any time in Settings.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg></div>
-      <h3>Light + dark</h3>
-      <p>Beautifully adapts to your system theme. Looks native in both modes.</p>
+      <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5Z"/></svg></div>
+      <h3>Filter by type</h3>
+      <p>One click narrows the list to Text, Images, Links or Files, with live counts on every chip.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></svg></div>
+      <h3>Colour detection</h3>
+      <p>Copy a hex, rgb or hsl value and ClipSave shows the swatch. Re-copy it in whichever notation you need.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="m8 8-5 4 5 4"/><path d="m16 8 5 4-5 4"/><path d="m14 5-4 14"/></svg></div>
+      <h3>Transform &amp; copy</h3>
+      <p>Trim whitespace, change case or format JSON as you copy. The saved clip stays exactly as it was.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div>
+      <h3>Quick Look</h3>
+      <p>Press Space on an image for a full-size preview, or just hover a row. Shortcuts are all reassignable.</p>
     </div>
     <div class="feature-card">
       <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></div>
@@ -792,7 +886,7 @@
     <div class="feature-card">
       <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.3 6.5L3 16"/><path d="M3 12a9 9 0 0 1 15.3-6.5L21 8"/><path d="M3 16v4h4"/><path d="M21 8V4h-4"/></svg></div>
       <h3>Auto-updates</h3>
-      <p>New versions install silently in the background. Always on the latest, never lifting a finger.</p>
+      <p>ClipSave checks for new versions on its own and installs them with one click. No re-downloading.</p>
     </div>
   </div>
 </section>
@@ -859,22 +953,65 @@
   </div>
 </section>
 
+<section id="whats-new" hidden>
+  <div class="section-label">What's new</div>
+  <h2 class="section-title" id="whats-new-title">Latest release</h2>
+  <div class="whats-new-body" id="whats-new-body"></div>
+</section>
+
+<section id="faq">
+  <div class="section-label">Questions</div>
+  <h2 class="section-title">Before you download</h2>
+  <div class="faq-list">
+    <details>
+      <summary>Does ClipSave send my clipboard anywhere?</summary>
+      <p>No. Your clips stay on your Mac. There is no account, no cloud sync and no analytics. The only time ClipSave contacts the internet is to check this website for a new version.</p>
+    </details>
+    <details>
+      <summary>What does it keep, and where?</summary>
+      <p>By default it keeps your last 30 temporary clips for 24 hours, and both limits can be changed in Settings. Temporary clips are forgotten when you quit unless you turn on "Keep history after quitting". Pinned clips live in a small file in your Documents folder until you delete them.</p>
+    </details>
+    <details>
+      <summary>Will it record passwords I copy?</summary>
+      <p>ClipSave records whatever lands on your clipboard, including text copied from a password manager. Before copying something sensitive, pause monitoring in Settings (you can assign a shortcut to pause and resume), and use "Clear Temporary" in the menu afterwards.</p>
+    </details>
+    <details>
+      <summary>Why does it ask for Accessibility access?</summary>
+      <p>Only for the optional Auto-paste feature, which presses ⌘V for you in the app you were using. It is off by default. Everything else works without it.</p>
+    </details>
+    <details>
+      <summary>Why does macOS ask about my Desktop folder?</summary>
+      <p>ClipSave adds new screenshots to your history, so it watches your screenshot folder and the Desktop. If you'd rather it didn't, turn off screenshot capture in Settings → Content.</p>
+    </details>
+    <details>
+      <summary>How do I update, and why must I drag it to Applications?</summary>
+      <p>Open the DMG and drag ClipSave into Applications. Updates then arrive on their own: a small red dot appears on the menu bar icon, or use "Check for Updates…" in the menu. If you run ClipSave straight from the DMG or Downloads, macOS can move it to a temporary location where updates cannot install.</p>
+    </details>
+    <details>
+      <summary>Is it really free?</summary>
+      <p>Yes. ClipSave is free and open source under the MIT license. The source is on GitHub.</p>
+    </details>
+  </div>
+</section>
+
 <section id="download" class="cta-section">
   <h2>Start keeping every copy in <span class="accent-text">10 seconds.</span></h2>
-  <p>Free, local, and built for macOS 14+.</p>
+  <p>Free, private, and built for macOS 14+.</p>
   <div class="cta-group" style="justify-content: center;">
     <a href="/download/ClipSave-3.7.dmg" class="btn btn-primary" download>
-      Download Latest →
+      Download for Mac →
     </a>
     <a href="https://github.com/Someshwar1108/ClipSave" class="btn btn-secondary">
-      View on GitHub
+      View source on GitHub
     </a>
   </div>
+  <div class="version-badge">v3.7 · 3.7 MB · macOS 14+ · Apple Silicon &amp; Intel · Notarized by Apple</div>
+  <p class="install-hint">Open the DMG, then drag ClipSave into Applications.</p>
 </section>
 
 <footer>
   <p>© 2026 ClipSave. Free and open source, <a href="https://github.com/Someshwar1108/ClipSave/blob/main/LICENSE" target="_blank">MIT licensed</a>.</p>
-  <p style="margin-top: 8px;">macOS 14+ • Apple Silicon &amp; Intel • Free forever</p>
+  <p style="margin-top: 8px;">macOS 14+ • Apple Silicon &amp; Intel • Light &amp; dark • Free forever</p>
 </footer>
 
 <script>
@@ -894,6 +1031,29 @@
     el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
     observer.observe(el);
   });
+
+  // "What's new" — rendered from the newest item in our own update feed,
+  // so it stays current with every release without editing this page.
+  (async () => {
+    try {
+      const res = await fetch('/appcast.xml', { cache: 'no-cache' });
+      if (!res.ok) return;
+      const xml = new DOMParser().parseFromString(await res.text(), 'application/xml');
+      const item = xml.querySelector('item');
+      if (!item) return;
+      const version = item.getElementsByTagName('sparkle:shortVersionString')[0]?.textContent;
+      const notes = item.querySelector('description')?.textContent;
+      if (!version || !notes) return;
+      const doc = new DOMParser().parseFromString(notes, 'text/html');
+      doc.querySelectorAll('script, iframe, object, embed, style, link').forEach(n => n.remove());
+      doc.querySelectorAll('*').forEach(n => {
+        [...n.attributes].forEach(a => { if (!['href'].includes(a.name)) n.removeAttribute(a.name); });
+      });
+      document.getElementById('whats-new-title').textContent = 'New in version ' + version;
+      document.getElementById('whats-new-body').innerHTML = doc.body.innerHTML;
+      document.getElementById('whats-new').hidden = false;
+    } catch (e) { /* section stays hidden */ }
+  })();
 
   // Interactive app mockup — tabs, filters, and row selection
   (() => {
