@@ -124,7 +124,8 @@ echo "==> Publishing into site/"
 mkdir -p "${SITE_DIR}/download"
 find "${SITE_DIR}/download" -name 'ClipSave-*.dmg' -delete
 cp "${DMG_PATH}" "${SITE_DIR}/download/"
-sed -i '' -E "s#/download/ClipSave-[0-9.]+\.dmg#/download/ClipSave-${VERSION}.dmg#g" "${SITE_DIR}/index.html"
+sed -i '' -E "s#/download/ClipSave-[0-9.]+\.dmg#/download/ClipSave-${VERSION}.dmg#g" "${SITE_DIR}/index.html" "${PROJECT_DIR}/README.md"
+sed -i '' -E "s#\(v[0-9.]+, notarized DMG#(v${VERSION}, notarized DMG#" "${PROJECT_DIR}/README.md"
 
 NOTES_FILE="${PROJECT_DIR}/release-notes/${VERSION}.html"
 if [ -f "${NOTES_FILE}" ]; then
