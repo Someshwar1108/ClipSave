@@ -313,3 +313,131 @@ struct KeyComboTests {
         #expect(decoded.display == "⌘⇧V")
     }
 }
+
+// MARK: - Keep-alive
+
+@Suite("Keep-alive")
+struct KeepAliveTests {
+
+    private func scratchURL() -> URL {
+        FileManager.default.temporaryDirectory
+            .appendingPathComponent("clipsave-test-\(UUID().uuidString)")
+            .appendingPathComponent("user-quit")
+    }
+
+    @Test("A Quit marker holds for the boot it was written in only")
+    func markerIsBootScoped() {
+        let url = scratchURL()
+        KeepAlive.markUserQuit(at: url, bootTime: 1000)
+        #expect(KeepAlive.userQuitThisBoot(at: url, bootTime: 1000))
+        #expect(!KeepAlive.userQuitThisBoot(at: url, bootTime: 2000))
+    }
+
+    @Test("Clearing the marker lets the agent reopen the app")
+    func clearing() {
+        let url = scratchURL()
+        KeepAlive.markUserQuit(at: url, bootTime: 1000)
+        KeepAlive.clearUserQuit(at: url)
+        #expect(!KeepAlive.userQuitThisBoot(at: url, bootTime: 1000))
+    }
+
+    @Test("The marker is absent until the user quits")
+    func noMarker() {
+        #expect(!KeepAlive.userQuitThisBoot(at: scratchURL(), bootTime: 1000))
+    }
+
+    @Test("The bundled agent plist is installed and parses")
+    func bundledPlist() throws {
+        let url = Bundle.main.bundleURL
+            .appendingPathComponent("Contents/Library/LaunchAgents")
+            .appendingPathComponent(KeepAlive.agentPlistName)
+        let data = try Data(contentsOf: url)
+        let plist = try #require(
+            try PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any])
+        #expect(plist["Label"] as? String == "som.ClipSave.keepalive")
+        #expect(plist["StartInterval"] as? Int == 20)
+    }
+
+    /// Runs the agent's real shell script with `open` replaced by `echo`.
+    private func runAgent(markerBoot: Int?, appRunning: Bool) throws -> String {
+        let url = Bundle.main.bundleURL
+            .appendingPathComponent("Contents/Library/LaunchAgents")
+            .appendingPathComponent(KeepAlive.agentPlistName)
+        let plist = try #require(
+            try PropertyListSerialization.propertyList(
+                from: Data(contentsOf: url), format: nil) as? [String: Any])
+        let args = try #require(plist["ProgramArguments"] as? [String])
+        var script = args[2]
+        // These tests run inside the ClipSave host process, so the real
+        // process check already sees the app as running.
+        if !appRunning {
+            script = script.replacingOccurrences(of: "pgrep -x ClipSave",
+                                                 with: "pgrep -x NoSuchProcessName")
+        }
+        script = script.replacingOccurrences(of: "exec /usr/bin/open -g", with: "echo REOPEN")
+        script = script.replacingOccurrences(of: "[ -d \"$APP\" ]", with: "true")
+
+        let home = FileManager.default.temporaryDirectory
+            .appendingPathComponent("clipsave-home-\(UUID().uuidString)")
+        let support = home.appendingPathComponent("Library/Application Support/ClipSave")
+        try FileManager.default.createDirectory(at: support, withIntermediateDirectories: true)
+        if let markerBoot {
+            try String(markerBoot).write(to: support.appendingPathComponent("user-quit"),
+                                         atomically: true, encoding: .utf8)
+        }
+
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/bin/sh")
+        process.arguments = ["-c", script]
+        process.environment = ["HOME": home.path]
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        try process.run()
+        process.waitUntilExit()
+        let out = String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+        return out.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    @Test("Agent reopens a stopped app")
+    func agentReopens() throws {
+        #expect(try runAgent(markerBoot: nil, appRunning: false).hasPrefix("REOPEN"))
+    }
+
+    @Test("Agent leaves a running app alone")
+    func agentIdleWhenRunning() throws {
+        #expect(try runAgent(markerBoot: nil, appRunning: true).isEmpty)
+    }
+
+    @Test("Agent respects a Quit made during this boot")
+    func agentRespectsQuit() throws {
+        let boot = try #require(KeepAlive.bootTimeSeconds)
+        #expect(try runAgent(markerBoot: boot, appRunning: false).isEmpty)
+    }
+
+    @Test("Agent ignores a Quit marker left over from an earlier boot")
+    func agentIgnoresStaleQuit() throws {
+        let boot = try #require(KeepAlive.bootTimeSeconds)
+        #expect(try runAgent(markerBoot: boot - 3600, appRunning: false).hasPrefix("REOPEN"))
+    }
+}
+
+// MARK: - Save failures
+
+@Suite("Save failures")
+struct SaveFailureTests {
+
+    @Test("Out-of-space errors are recognised in every shape the system reports them")
+    func outOfSpace() {
+        #expect(ClipboardManager.isOutOfSpace(CocoaError(.fileWriteOutOfSpace)))
+        #expect(ClipboardManager.isOutOfSpace(NSError(domain: NSPOSIXErrorDomain, code: Int(ENOSPC))))
+        let wrapped = NSError(domain: NSCocoaErrorDomain, code: 512,
+                              userInfo: [NSUnderlyingErrorKey: NSError(domain: NSPOSIXErrorDomain,
+                                                                       code: Int(ENOSPC))])
+        #expect(ClipboardManager.isOutOfSpace(wrapped))
+    }
+
+    @Test("Other errors are not mistaken for a full disk")
+    func otherErrors() {
+        #expect(!ClipboardManager.isOutOfSpace(CocoaError(.fileWriteNoPermission)))
+    }
+}

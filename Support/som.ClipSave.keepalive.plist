@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>som.ClipSave.keepalive</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/sh</string>
+		<string>-c</string>
+		<string>BOOT=$(/usr/sbin/sysctl -n kern.boottime | /usr/bin/sed -E 's/^\{ sec = ([0-9]+),.*/\1/')
+FLAG="$HOME/Library/Application Support/ClipSave/user-quit"
+if [ -f "$FLAG" ] &amp;&amp; [ "$(/bin/cat "$FLAG")" = "$BOOT" ]; then exit 0; fi
+/usr/bin/pgrep -x ClipSave &gt;/dev/null &amp;&amp; exit 0
+for APP in /Applications/ClipSave.app "$HOME/Applications/ClipSave.app"; do
+  if [ -d "$APP" ]; then exec /usr/bin/open -g "$APP"; fi
+done
+exit 0</string>
+	</array>
+	<key>StartInterval</key>
+	<integer>20</integer>
+	<key>RunAtLoad</key>
+	<false/>
+	<key>LimitLoadToSessionType</key>
+	<string>Aqua</string>
+	<key>ProcessType</key>
+	<string>Background</string>
+</dict>
+</plist>

@@ -29,6 +29,10 @@ final class TempHistoryStore {
 
     private var pendingSave: Task<Void, Never>?
 
+    /// Reports each save's outcome (`nil` on success) so the UI can say when
+    /// history is not reaching the disk, instead of failing silently.
+    var onSaveResult: ((Error?) -> Void)?
+
     private init() {}
 
     // MARK: - Locations
@@ -62,7 +66,9 @@ final class TempHistoryStore {
             // saves re-encoding the whole list on every single keystroke-fast
             // clipboard change.
             let snapshot = self.encode(clips)
-            await Self.write(snapshot)
+            let failure = await Self.write(snapshot)
+            guard !Task.isCancelled else { return }
+            self.onSaveResult?(failure)
         }
     }
 
@@ -71,7 +77,7 @@ final class TempHistoryStore {
         pendingSave?.cancel()
         pendingSave = nil
         let snapshot = encode(clips)
-        Self.writeSynchronously(snapshot)
+        onSaveResult?(Self.writeSynchronously(snapshot))
     }
 
     private struct Snapshot: Sendable {
@@ -113,31 +119,53 @@ final class TempHistoryStore {
         return Snapshot(json: json, images: images, liveImageFiles: liveFiles)
     }
 
-    private nonisolated static func write(_ snapshot: Snapshot) async {
+    private nonisolated static func write(_ snapshot: Snapshot) async -> Error? {
         await Task.detached(priority: .utility) {
             writeSynchronously(snapshot)
         }.value
     }
 
-    private nonisolated static func writeSynchronously(_ snapshot: Snapshot) {
+    /// Returns the first error hit, or `nil` if everything was written.
+    ///
+    /// Every write is atomic (temp file, then rename), so a full disk leaves
+    /// the previous index intact instead of truncating it.
+    private nonisolated static func writeSynchronously(_ snapshot: Snapshot) -> Error? {
         let fm = FileManager.default
-        try? fm.createDirectory(at: imagesDirectory, withIntermediateDirectories: true)
+        var failure: Error?
+
+        do {
+            try fm.createDirectory(at: imagesDirectory, withIntermediateDirectories: true)
+        } catch {
+            failure = error
+        }
 
         for payload in snapshot.images {
             let destination = imagesDirectory.appendingPathComponent(payload.filename)
             // Names are content hashes, so an existing file is already correct.
             guard !fm.fileExists(atPath: destination.path) else { continue }
-            try? payload.data.write(to: destination, options: .atomic)
+            do {
+                try payload.data.write(to: destination, options: .atomic)
+            } catch {
+                failure = failure ?? error
+            }
         }
 
-        try? snapshot.json.write(to: indexFile, options: .atomic)
+        do {
+            try snapshot.json.write(to: indexFile, options: .atomic)
+        } catch {
+            failure = failure ?? error
+        }
 
         // Drop sidecars for clips that have since expired or been deleted.
-        if let existing = try? fm.contentsOfDirectory(atPath: imagesDirectory.path) {
+        // Skipped after a failed save: the old index on disk may still point
+        // at them.
+        if failure == nil,
+           let existing = try? fm.contentsOfDirectory(atPath: imagesDirectory.path) {
             for filename in existing where !snapshot.liveImageFiles.contains(filename) {
                 try? fm.removeItem(at: imagesDirectory.appendingPathComponent(filename))
             }
         }
+        return failure
     }
 
     // MARK: - Loading

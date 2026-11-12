@@ -420,6 +420,12 @@ class ClipboardManager: ObservableObject {
     }
     @Published var permClips: [Clip] = []
     @Published var lastEvent: String = "idle"
+    /// Set while history cannot be written to disk (most often a full disk).
+    /// Clips keep working from memory; this just tells the user.
+    @Published var diskWarning: String?
+
+    private var saveFailures: [String: Error] = [:]
+    private var saveRetry: Task<Void, Never>?
 
     private var lastChangeCount: Int = NSPasteboard.general.changeCount
     private let permFile = "perm-clips-native.json"
@@ -433,6 +439,9 @@ class ClipboardManager: ObservableObject {
 
 
     init() {
+        TempHistoryStore.shared.onSaveResult = { [weak self] error in
+            self?.noteSave("temp", error: error)
+        }
         loadPermanent()
         restoreTemporaryIfNeeded()
         let timer = Timer(timeInterval: 0.5, repeats: true) { [weak self] _ in
@@ -765,9 +774,62 @@ class ClipboardManager: ObservableObject {
     }
     
     private func savePermanent() {
-        if let encoded = try? JSONEncoder().encode(permClips) {
-            let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(permFile)
-            try? encoded.write(to: url)
+        guard let encoded = try? JSONEncoder().encode(permClips) else { return }
+        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(permFile)
+        do {
+            // Atomic: a full disk must not leave a half-written file in place
+            // of the pinned clips that were there before.
+            try encoded.write(to: url, options: .atomic)
+            noteSave("perm", error: nil)
+        } catch {
+            noteSave("perm", error: error)
+        }
+    }
+
+    // MARK: - Save failures
+
+    nonisolated static func isOutOfSpace(_ error: Error) -> Bool {
+        if (error as? CocoaError)?.code == .fileWriteOutOfSpace { return true }
+        let ns = error as NSError
+        if ns.domain == NSPOSIXErrorDomain && ns.code == Int(ENOSPC) { return true }
+        if let underlying = ns.userInfo[NSUnderlyingErrorKey] as? NSError,
+           underlying.domain == NSPOSIXErrorDomain && underlying.code == Int(ENOSPC) {
+            return true
+        }
+        return false
+    }
+
+    private func noteSave(_ source: String, error: Error?) {
+        if let error {
+            saveFailures[source] = error
+        } else {
+            saveFailures[source] = nil
+        }
+
+        if let first = saveFailures.values.first {
+            diskWarning = Self.isOutOfSpace(first)
+                ? "Disk almost full — history not saved"
+                : "Couldn't save clips to disk"
+            scheduleSaveRetry()
+        } else {
+            diskWarning = nil
+            saveRetry?.cancel()
+            saveRetry = nil
+        }
+    }
+
+    /// Tries again on its own, so clips are written as soon as space is freed
+    /// without the user having to do anything.
+    private func scheduleSaveRetry() {
+        guard saveRetry == nil else { return }
+        saveRetry = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(30))
+            guard !Task.isCancelled, let self else { return }
+            self.saveRetry = nil
+            if self.saveFailures["perm"] != nil { self.savePermanent() }
+            if self.saveFailures["temp"] != nil, AppSettings.shared.persistTempClips {
+                TempHistoryStore.shared.scheduleSave(self.tempClips)
+            }
         }
     }
     
@@ -1033,7 +1095,11 @@ struct ContentView: View {
                     }
                     .disabled(manager.permClips.isEmpty)
                     Divider()
-                    Button("Quit ClipSave") { NSApplication.shared.terminate(nil) }
+                    Button("Quit ClipSave") {
+                        // Tells the keep-alive agent this stop is deliberate.
+                        KeepAlive.markUserQuit()
+                        NSApplication.shared.terminate(nil)
+                    }
                 } label: {
                     Image(systemName: "line.3.horizontal")
                         .font(.system(size: 13, weight: .semibold))
@@ -1184,11 +1250,20 @@ struct ContentView: View {
                 Text("·")
                     .font(.system(size: 10))
                     .foregroundColor(.secondary)
-                Text(footerStatus)
-                    .font(.system(size: 10))
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
+                if let warning = manager.diskWarning {
+                    Text("⚠️ \(warning)")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(.orange)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .help("ClipSave keeps working from memory and will save again as soon as there is space.")
+                } else {
+                    Text(footerStatus)
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
                 Spacer()
                 Button(action: { manager.forceCheck() }) {
                     Image(systemName: "arrow.clockwise")
@@ -1542,6 +1617,7 @@ struct SettingsView: View {
     @ObservedObject private var settings = AppSettings.shared
     @State private var launchAtLogin = false
     @State private var loginItemError: String?
+    @State private var keepAliveNeedsApproval = false
 
     var body: some View {
         TabView {
@@ -1764,7 +1840,7 @@ struct SettingsView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
 
-                Toggle("Launch ClipSave at login", isOn: $launchAtLogin)
+                Toggle("Open ClipSave at login and keep it running", isOn: $launchAtLogin)
                     .onChange(of: launchAtLogin) { _, newValue in
                         loginItemError = LoginItem.setEnabled(newValue)
                         // Show what the system actually did, not what we asked
@@ -1772,6 +1848,20 @@ struct SettingsView: View {
                         let actual = LoginItem.isEnabled
                         if actual != newValue { launchAtLogin = actual }
                     }
+                Text("ClipSave starts when you log in and reopens itself if macOS stops it. Choosing Quit from the menu keeps it closed until your next login.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                if launchAtLogin && keepAliveNeedsApproval {
+                    HStack(spacing: 6) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.orange)
+                        Text("Allow ClipSave under “Allow in the Background” so it can reopen itself.")
+                            .font(.caption)
+                        Spacer()
+                        Button("Open…") { LoginItem.openSystemSettings() }
+                            .controlSize(.small)
+                    }
+                }
                 if let loginItemError {
                     HStack(spacing: 6) {
                         Image(systemName: "exclamationmark.triangle.fill")
@@ -1801,7 +1891,10 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .onAppear { launchAtLogin = LoginItem.isEnabled }
+        .onAppear {
+            launchAtLogin = LoginItem.isEnabled
+            keepAliveNeedsApproval = KeepAlive.needsApproval
+        }
     }
 
     private var contentTab: some View {

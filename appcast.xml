@@ -7,6 +7,29 @@
         <language>en</language>
 
         <item>
+            <title>Version 3.8</title>
+            <sparkle:version>3.8</sparkle:version>
+            <sparkle:shortVersionString>3.8</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <pubDate>Thu, 12 Nov 2026 11:34:52 -0600</pubDate>
+            <description><![CDATA[
+                <h3>What's new in V3.8</h3>
+<ul>
+<li><b>Stays in your menu bar</b> — ClipSave now opens at login by default and reopens itself if macOS stops it. Quit from the menu still keeps it closed until your next login</li>
+<li><b>Safe on a full disk</b> — if your Mac runs out of space, ClipSave keeps working, shows a small warning, and saves again as soon as space is free</li>
+</ul>
+<h3>Fixes</h3>
+<ul>
+<li>A full disk can no longer corrupt your pinned clips file</li>
+</ul>
+            ]]></description>
+            <enclosure
+                url="https://clipsave-mu.vercel.app/download/ClipSave-3.8.dmg"
+                sparkle:edSignature="GjeDnxSf3/Au63JUB6idYyux2FPCc3pcvU4uU7K7Z9I9l/cejhudyvucikm8v8269N2fqwxnKiE14n/jtve+Bg==" length="3742270"
+                type="application/octet-stream" />
+        </item>
+
+        <item>
             <title>Version 3.7</title>
             <sparkle:version>3.7</sparkle:version>
             <sparkle:shortVersionString>3.7</sparkle:shortVersionString>

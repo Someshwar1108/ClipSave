@@ -4,7 +4,7 @@ A clipboard manager that lives in your Mac's menu bar. Free, local, no account.
 
 ## Download
 
-**[Download ClipSave for Mac](https://clipsave-mu.vercel.app/download/ClipSave-3.7.dmg)** (v3.7, notarized DMG, macOS 14+)
+**[Download ClipSave for Mac](https://clipsave-mu.vercel.app/download/ClipSave-3.8.dmg)** (v3.8, notarized DMG, macOS 14+)
 
 Open the DMG and drag ClipSave into **Applications**. Run it from Applications so it can update itself. Later versions install from **Check for Updates…** inside the app.
 
@@ -18,6 +18,7 @@ Website: https://clipsave-mu.vercel.app
 - Filter by Text, Images, Links or Files; search across clips
 - Colour detection, text transforms, and image Quick Look
 - Optional automatic capture of screenshots
+- Opens at login and reopens itself if macOS stops it; Quit keeps it closed
 
 
 ## Build from source

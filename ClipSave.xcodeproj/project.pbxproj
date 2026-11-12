@@ -8,7 +8,22 @@
 
 /* Begin PBXBuildFile section */
 		5A3E92592FDE0BAB00C4FC65 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 5A3E92582FDE0BAB00C4FC65 /* Sparkle */; };
+		5A4C10022FE0000100C4FC65 /* som.ClipSave.keepalive.plist in Install Keep-Alive Agent */ = {isa = PBXBuildFile; fileRef = 5A4C10012FE0000100C4FC65 /* som.ClipSave.keepalive.plist */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		5A4C10032FE0000100C4FC65 /* Install Keep-Alive Agent */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Contents/Library/LaunchAgents;
+			dstSubfolderSpec = 1;
+			files = (
+				5A4C10022FE0000100C4FC65 /* som.ClipSave.keepalive.plist in Install Keep-Alive Agent */,
+			);
+			name = "Install Keep-Alive Agent";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXContainerItemProxy section */
 		5A9BD7E62F8777AA0004A971 /* PBXContainerItemProxy */ = {
@@ -31,6 +46,7 @@
 		5A9BD7D82F8777A80004A971 /* ClipSave.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClipSave.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A9BD7E52F8777AA0004A971 /* ClipSaveTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClipSaveTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A9BD7EF2F8777AA0004A971 /* ClipSaveUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClipSaveUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A4C10012FE0000100C4FC65 /* som.ClipSave.keepalive.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = som.ClipSave.keepalive.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -103,6 +119,7 @@
 				5A9BD7DA2F8777A80004A971 /* ClipSave */,
 				5A9BD7E82F8777AA0004A971 /* ClipSaveTests */,
 				5A9BD7F22F8777AA0004A971 /* ClipSaveUITests */,
+				5A4C10042FE0000100C4FC65 /* Support */,
 				5A3E92572FDE0BAB00C4FC65 /* Frameworks */,
 				5A9BD7D92F8777A80004A971 /* Products */,
 			);
@@ -118,6 +135,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		5A4C10042FE0000100C4FC65 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				5A4C10012FE0000100C4FC65 /* som.ClipSave.keepalive.plist */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -128,6 +153,7 @@
 				5A9BD7D42F8777A80004A971 /* Sources */,
 				5A9BD7D52F8777A80004A971 /* Frameworks */,
 				5A9BD7D62F8777A80004A971 /* Resources */,
+				5A4C10032FE0000100C4FC65 /* Install Keep-Alive Agent */,
 			);
 			buildRules = (
 			);

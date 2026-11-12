@@ -84,10 +84,17 @@ Screenshot files are read with a poll-until-size-stable loop before being ingest
 
 `ThumbnailCache` decodes images once via ImageIO (`CGImageSourceCreateThumbnailAtIndex`) and caches both the row-sized thumbnail and a separate mid-size hover-preview image, keyed by `contentHash`. SwiftUI view `body` computed properties re-run on every redraw, so calling `NSImage(data:)` directly inside a `View` for an image clip re-decodes the full-resolution bitmap on every frame — go through the cache instead.
 
+### Staying in the menu bar: login item + keep-alive agent
+
+`LoginItem` registers `SMAppService.mainApp` (starts ClipSave at login) and `KeepAlive` registers a bundled launchd agent (`Support/som.ClipSave.keepalive.plist`, copied to `Contents/Library/LaunchAgents/` by the "Install Keep-Alive Agent" copy-files phase). The agent runs a small `/bin/sh` script every 20 s: if ClipSave isn't running and the user didn't choose Quit *this boot*, it reopens `/Applications/ClipSave.app`. The menu's Quit writes `~/Library/Application Support/ClipSave/user-quit` containing the boot time (`kern.boottime` seconds); the file means "stay closed" only while it matches the current boot, so a Quit never survives a restart. Every launch clears it. Launch-at-login defaults to on, once, for copies running from `/Applications` (`enableByDefaultOnce`); a user who turns it off, or disabled it in System Settings, is respected. `applicationDidFinishLaunching` exits immediately if another copy from the same bundle path is already running.
+
+Gotchas: the script's boot-time `sed` must anchor on `{ sec =` — `usec = ` also matches `sec = ` (this was a real bug caught by `KeepAliveTests`). `KeepAliveTests` runs the plist's actual script with `open` stubbed. Registering the agent for real (status `.enabled` vs `.requiresApproval`, the "Background Items" notification) can only be checked on an installed, signed copy — not in unit tests.
+
 ### Persistence
 
 - **Permanent clips**: plain JSON at `~/Documents/perm-clips-native.json` (with a one-time migration path from the old sandboxed container location, for installs that predate sandbox removal).
 - **Temporary clips**: opt-in (`AppSettings.persistTempClips`, off by default). When enabled, `TempHistoryStore` writes a small JSON index plus image data as separate sidecar files under Application Support, rather than inlining image bytes into the JSON — keeps the index cheap to encode/decode and lets identical images de-dupe on disk for free. Saves are debounced (~600ms) except on quit, which flushes synchronously.
+- **Full-disk handling**: all writes are atomic (a failed write leaves the previous file intact), failures are reported through `ClipboardManager.noteSave`, which shows an orange footer warning (`diskWarning`) and retries every 30 s until the save succeeds. Clips keep working from memory meanwhile. Sidecar-image cleanup is skipped after a failed save so the old index never points at deleted files.
 
 ## Release process
 

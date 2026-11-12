@@ -94,6 +94,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var foregroundReasons: Set<String> = []
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // The keep-alive agent, the login item and the user can all start the
+        // app around the same moment. Exit at once rather than running a
+        // second copy; `exit` skips the terminate path so this never saves
+        // over the history the first copy owns.
+        let myPID = ProcessInfo.processInfo.processIdentifier
+        let sameBundleCopies = NSRunningApplication
+            .runningApplications(withBundleIdentifier: Bundle.main.bundleIdentifier ?? "")
+            .filter { $0.processIdentifier != myPID && $0.bundleURL == Bundle.main.bundleURL }
+        if !sameBundleCopies.isEmpty { exit(0) }
+
+        // Any start means the user wants ClipSave running, so a Quit from an
+        // earlier session no longer holds the agent back.
+        KeepAlive.clearUserQuit()
+        LoginItem.enableByDefaultOnce()
+        LoginItem.ensureKeepAliveIfEnabled()
+
         AppDelegate.shared = self
         _ = updaterController
         AutoPaste.shared.startTrackingFrontmostApp()
